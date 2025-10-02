@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard</title>
+  <script src="dashboard.js" defer></script>
+     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="flex h-screen bg-gray-100">
+  <div class="w-64 bg-blue-800 text-white p-4">
+    <h2 class="text-xl font-bold mb-6">Dashboard</h2>
+    <ul>
+      <li><button id="teachersBtn" class="block w-full text-left py-2 hover:bg-blue-600">Teachers</button></li>
+      <li><button id="resultsBtn" class="block w-full text-left py-2 hover:bg-blue-600">Results</button></li>
+    </ul>
+  </div>
+
+  <div id="content" class="flex-1 p-6 overflow-y-auto">
+    <h1 class="text-2xl font-bold mb-4">Welcome</h1>
+    <div id="dataContainer"></div>
+  </div>
+  <script>
+    const teachersBtn = document.getElementById("teachersBtn");
+const resultsBtn = document.getElementById("resultsBtn");
+const container = document.getElementById("dataContainer");
+
+const TEACHERS_API = "https://68de7222d7b591b4b78f90b4.mockapi.io/name";
+const RESULTS_API = "https://68de78a5d7b591b4b78fa6c9.mockapi.io/name";
+
+
+async function loadTeachers() {
+  container.innerHTML = "<p>Loading teachers...</p>";
+  try {
+    const res = await fetch(TEACHERS_API);
+    const data = await res.json();
+
+    container.innerHTML = `
+      <h2 class="text-xl font-bold mb-4">Teachers</h2>
+      <div class="grid gap-4">
+        ${data.map(teacher => `
+          <div class="p-4 bg-white shadow rounded">
+            <h3 class="font-bold text-lg">${teacher.name}</h3>
+            <p>Qualification: ${teacher.qualification}</p>
+            <h4 class="mt-2 font-semibold">Lectures:</h4>
+            <ul>
+              ${teacher.lectures.map(lec => `<li>${lec.subject} - ${lec.timing}</li>`).join("")}
+            </ul>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = "<p class='text-red-500'>Error loading teachers</p>";
+  }
+}
+
+async function loadResults() {
+  container.innerHTML = "<p>Loading results...</p>";
+  try {
+    const res = await fetch(RESULTS_API);
+    const data = await res.json();
+
+    container.innerHTML = `
+      <h2 class="text-xl font-bold mb-4">Results</h2>
+      ${data.map(student => `
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="text-lg font-semibold">${student.studentName}</h3>
+              <p class="text-gray-600">Roll No: ${student.roll} | Class: ${student.class}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-green-600">${student.percentage}%</p>
+              <p class="text-sm text-gray-500">${student.remarks}</p>
+            </div>
+          </div>
+
+          <table class="min-w-full bg-white border border-gray-200 rounded">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="py-2 px-4 text-left border">Subject</th>
+                <th class="py-2 px-4 text-left border">Marks</th>
+                <th class="py-2 px-4 text-left border">Grade</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${student.subjectResults.map(sr => `
+                <tr>
+                  <td class="py-2 px-4 border">${sr.subject}</td>
+                  <td class="py-2 px-4 border">${sr.marksObtained}</td>
+                  <td class="py-2 px-4 border">${sr.grade}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `).join("")}
+    `;
+  } catch (err) {
+    console.error("Error fetching results:", err);
+    container.innerHTML = "<p class='text-red-500'>Error loading results</p>";
+  }
+}
+
+
+teachersBtn.addEventListener("click", loadTeachers);
+resultsBtn.addEventListener("click", loadResults);
+
+  </script>
+</body>
+</html>
